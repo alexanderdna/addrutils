@@ -1,0 +1,17 @@
+{
+  "name": "addrutils",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "Anh Dang",
+  "license": "MIT",
+  "dependencies": {
+    "@scure/bip32": "^1.1.1",
+    "@scure/bip39": "^1.1.0",
+    "yargs": "^17.6.2"
+  }
+}
