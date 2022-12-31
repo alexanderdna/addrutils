@@ -4,6 +4,14 @@ Utilities for Ethereum address generation.
 
 ## Usage
 
+### The fastest way
+
+```bash
+node index.js
+```
+
+### Full usage information
+
 ```
 Usage: node index.js [options]
 
@@ -34,3 +42,23 @@ available since there is only one mnemonic phrase.
 Instead, user can provide a private key using the -p option. In such case,
 mnemonic phrase is not available, as well as the -i and -c options.
 ```
+
+## Containerized execution
+
+For better security, this script should be run in an offline
+environment. One possible way to do this is a Docker container
+without network interface.
+
+I created a Batch script to run such container, which is based
+on `alpine:3.17`. The script will package the program using `pkg`,
+load it onto the container, run the program and redirect its
+output to a text file within the same directory, then stop
+and remove the container as well as other temporary files.
+
+The Batch script is `generate-in-container.bat`. You are advised
+to have a look at it to make sure it works the way you prefer.
+
+## Contribute
+
+This repo is in its early stage as I am learning things.
+Please feel free to give feedbacks. Thank you!
