@@ -2,7 +2,7 @@ const { HDKey } = require('@scure/bip32');
 const bip39 = require('@scure/bip39');
 const { wordlist } = require('@scure/bip39/wordlists/english');
 const { keccak_256 } = require('@noble/hashes/sha3');
-const { bytesToHex: toHex } = require('@noble/hashes/utils');
+const { bytesToHex: toHex, hexToBytes } = require('@noble/hashes/utils');
 const secp256k1 = require('@noble/secp256k1');
 const yargs = require('yargs');
 const { hideBin } = require('yargs/helpers');
@@ -33,8 +33,8 @@ function printAddress(
   mnemonic,
   privateKey,
   accountIndex,
-  showingMnemonic,
-  showingPrivateKey,
+  hidingMnemonic,
+  hidingPrivateKey,
   hidingAddress
 ) {
   let address;
@@ -49,11 +49,21 @@ function printAddress(
     privateKey = '0x' + toHex(account.privateKey);
     address = generateAddress(account.privateKey);
   } else if (privateKey != '') {
+    mnemonic = '<not available>';
+    if (!/^0x[0-9A-Fa-f]{64}$/.test(privateKey)) {
+      console.error('Invalid private key');
+      process.exit(1);
+      return;
+    }
+
+    const privateKeyBytes = hexToBytes(privateKey.slice(2));
+    address = generateAddress(privateKeyBytes);
   }
-  if (showingMnemonic) {
+
+  if (!hidingMnemonic) {
     console.log(mnemonic);
   }
-  if (showingPrivateKey) {
+  if (!hidingPrivateKey) {
     console.log(privateKey);
   }
   if (!hidingAddress) {
@@ -62,42 +72,72 @@ function printAddress(
 }
 
 const argv = yargs(hideBin(process.argv))
+  .scriptName('addrutils')
   .usage('Usage: $0 [options]')
-  .string('m')
-  .nargs('m', 1)
-  .default('m', '')
-  .alias('m', 'mnemonic')
-  .describe('m', 'Mnemonic phrase input')
-  .string('p')
-  .nargs('p', 1)
-  .default('p', '')
-  .alias('p', 'private-key')
-  .describe('p', 'Private key input')
-  .number('i')
-  .nargs('i', 1)
-  .default('i', 0)
-  .alias('i', 'index')
-  .describe(
-    'i',
-    'Account index (only applicable if using mnemonic phrase as input)'
-  )
-  .number('c')
-  .nargs('c', 1)
-  .default('c', 1)
-  .alias('c', 'count')
-  .describe('c', 'Number of addresses to generate')
-  .boolean('show-mnemonic')
-  .default('show-mnemonic', false)
-  .describe('show-mnemonic', 'Also print mnemonic phrase in output')
-  .boolean('show-private-key')
-  .default('show-private-key', false)
-  .describe('show-private-key', 'Also print private key in output')
-  .boolean('hide-address')
-  .default('hide-address', false)
-  .describe('hide-address', 'Hide address in output')
+  .option('m', {
+    type: 'string',
+    nargs: 1,
+    default: '',
+    alias: 'mnemonic',
+    describe: 'Mnemonic phrase input',
+  })
+  .option('p', {
+    type: 'string',
+    nargs: 1,
+    default: '',
+    alias: 'private-key',
+    describe: 'Private key input',
+  })
+  .option('i', {
+    type: 'number',
+    nargs: 1,
+    default: 0,
+    alias: 'index',
+    describe:
+      'Account index (only applicable if using mnemonic phrase as input)',
+  })
+  .option('c', {
+    type: 'number',
+    nargs: 1,
+    default: 1,
+    alias: 'count',
+    describe:
+      'Number of addresses to generate (only applicable if -m and -p are not provided)',
+  })
+  .option('hide-mnemonic', {
+    type: 'boolean',
+    default: false,
+    describe: 'Hide mnemonic phrase in output',
+  })
+  .option('hide-private-key', {
+    type: 'boolean',
+    default: false,
+    describe: 'Hide private key in output',
+  })
+  .option('hide-address', {
+    type: 'boolean',
+    default: false,
+    describe: 'Hide address in output',
+  })
   .help('h')
   .alias('h', 'help')
-  .alias('v', 'version').argv;
+  .alias('v', 'version')
+  .epilog(
+    'This program can be called without any options. ' +
+      'In such case, it will generate a cryptographically-safe random mnemonic phrase. ' +
+      'User can provide the -i option to change the account index in the derivation path (default is 0), ' +
+      'as well as the -c option to change the number of accounts they wish to generate.\n'
+  )
+  .epilog(
+    'User can provide an existing mnemonic phrase using the -m option. ' +
+      'In such case, the private key and address will be generated from this mnemonic phrase. ' +
+      'User can provide the -i option to chane the account index. ' +
+      'The -c option will not be available since there is only one mnemonic phrase.\n'
+  )
+  .epilog(
+    'Instead, user can provide a private key using the -p option. ' +
+      'In such case, mnemonic phrase is not available, as well as the -i and -c options.'
+  ).argv;
 
 let count = argv.count;
 if (count <= 0) count = 1;
@@ -106,8 +146,8 @@ for (let i = 0; i < count; ++i) {
     argv.mnemonic,
     argv.privateKey,
     argv.index,
-    argv.showMnemonic,
-    argv.showPrivateKey,
+    argv.hideMnemonic,
+    argv.hidePrivateKey,
     argv.hideAddress
   );
 }
