@@ -79,13 +79,13 @@ const argv = yargs(hideBin(process.argv))
   .alias('i', 'index')
   .describe(
     'i',
-    'Account index (only applicable\nif using mnemonic phrase as input)'
+    'Account index (only applicable if using mnemonic phrase as input)'
   )
   .number('c')
   .nargs('c', 1)
   .default('c', 1)
   .alias('c', 'count')
-  .describe('c', 'Number of addresses to generate\ndefault = 1')
+  .describe('c', 'Number of addresses to generate')
   .boolean('show-mnemonic')
   .default('show-mnemonic', false)
   .describe('show-mnemonic', 'Also print mnemonic phrase in output')
