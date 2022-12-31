@@ -29,7 +29,7 @@ docker cp .tmp/%BINARY_NAME% %CONTAINER_NAME%:/usr/bin/
 
 ECHO Running script in container...
 docker exec -it %CONTAINER_NAME% ^
-    %BINARY_NAME% --show-mnemonic --show-private-key -c %ACCOUNT_COUNT% > %OUTPUT_FILE%
+    %BINARY_NAME% -c %ACCOUNT_COUNT% > %OUTPUT_FILE%
 
 ECHO Stopping and removing container...
 docker stop %CONTAINER_NAME% >NUL
