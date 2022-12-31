@@ -15,5 +15,8 @@
     "@scure/bip32": "^1.1.1",
     "@scure/bip39": "^1.1.0",
     "yargs": "^17.6.2"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.0"
   }
 }
