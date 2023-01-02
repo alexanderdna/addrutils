@@ -60,6 +60,10 @@ export function generateAccount(
   privateKey = '',
   accountIndex = 0
 ) {
+  if (accountIndex < 0) {
+    throw new Error('invalid account index');
+  }
+
   if (mnemonic == '' && privateKey == '') {
     mnemonic = generateMnemonic();
   }
