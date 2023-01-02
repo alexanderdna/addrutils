@@ -1,7 +1,7 @@
 {
-  "name": "addrutils",
+  "name": "@alexanderdna/addrutils",
   "version": "1.0.0",
-  "description": "",
+  "description": "Ethereum address utilities",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -10,6 +10,14 @@
     "build:win:x64": "npm run convert && pkg cjs/index.js -t node16-win-x64 -o .tmp/addrutils.exe",
     "test": "jest --watchAll --verbose"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alexanderdna/addrutils.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alexanderdna/addrutils/issues"
+  },
+  "homepage": "https://github.com/alexanderdna/addrutils",
   "keywords": [],
   "author": "Anh Dang",
   "license": "MIT",
