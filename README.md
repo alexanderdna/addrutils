@@ -7,13 +7,13 @@ Utilities for Ethereum address generation.
 ### The fastest way
 
 ```bash
-node src/index.js
+node src/cli.js
 ```
 
 ### Full usage information
 
 ```
-Usage: node index.js [options]
+Usage: node cli.js [options]
 
 Options:
   -m, --mnemonic          Mnemonic phrase input           [string] [default: ""]

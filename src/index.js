@@ -1,105 +1,94 @@
-import { generateAccount } from './account.js';
-import yargs from 'yargs';
-import { hideBin } from 'yargs/helpers';
+import { HDKey } from '@scure/bip32';
+import * as bip39 from '@scure/bip39';
+import { wordlist } from '@scure/bip39/wordlists/english.js';
+import { keccak_256 } from '@noble/hashes/sha3';
+import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
+import * as secp256k1 from '@noble/secp256k1';
 
-function printAddress(
-  mnemonic,
-  privateKey,
-  accountIndex,
-  hidingMnemonic,
-  hidingPrivateKey,
-  hidingAddress
-) {
-  const result = generateAccount(mnemonic, privateKey, accountIndex);
+const thePath = "m/44'/60'/0'/0/";
 
-  if (!hidingMnemonic) {
-    console.log(result.mnemonic);
-  }
-  if (!hidingPrivateKey) {
-    console.log(result.privateKey);
-  }
-  if (!hidingAddress) {
-    console.log(result.address);
-  }
+export function generateMnemonic() {
+  return bip39.generateMnemonic(wordlist);
 }
 
-const argv = yargs(hideBin(process.argv))
-  .scriptName('addrutils')
-  .usage('Usage: $0 [options]')
-  .option('m', {
-    type: 'string',
-    nargs: 1,
-    default: '',
-    alias: 'mnemonic',
-    describe: 'Mnemonic phrase input',
-  })
-  .option('p', {
-    type: 'string',
-    nargs: 1,
-    default: '',
-    alias: 'private-key',
-    describe: 'Private key input',
-  })
-  .option('i', {
-    type: 'number',
-    nargs: 1,
-    default: 0,
-    alias: 'index',
-    describe:
-      'Account index (only applicable if using mnemonic phrase as input)',
-  })
-  .option('c', {
-    type: 'number',
-    nargs: 1,
-    default: 1,
-    alias: 'count',
-    describe:
-      'Number of addresses to generate (only applicable if -m and -p are not provided)',
-  })
-  .option('hide-mnemonic', {
-    type: 'boolean',
-    default: false,
-    describe: 'Hide mnemonic phrase in output',
-  })
-  .option('hide-private-key', {
-    type: 'boolean',
-    default: false,
-    describe: 'Hide private key in output',
-  })
-  .option('hide-address', {
-    type: 'boolean',
-    default: false,
-    describe: 'Hide address in output',
-  })
-  .help('h')
-  .alias('h', 'help')
-  .alias('v', 'version')
-  .epilog(
-    'This program can be called without any options. ' +
-      'In such case, it will generate a cryptographically-safe random mnemonic phrase. ' +
-      'User can provide the -i option to change the account index in the derivation path (default is 0), ' +
-      'as well as the -c option to change the number of accounts they wish to generate.\n'
-  )
-  .epilog(
-    'User can provide an existing mnemonic phrase using the -m option. ' +
-      'In such case, the private key and address will be generated from this mnemonic phrase. ' +
-      'User can provide the -i option to chane the account index. ' +
-      'The -c option will not be available since there is only one mnemonic phrase.\n'
-  )
-  .epilog(
-    'Instead, user can provide a private key using the -p option. ' +
-      'In such case, mnemonic phrase is not available, as well as the -i and -c options.'
-  ).argv;
+/**
+ *
+ * @param {Uint8Array} privateKey private key byte array
+ * @returns {string} a checksumed address
+ */
+export function generateAddress(privateKey) {
+  if (privateKey.length != 32) {
+    throw new Error('invalid private key');
+  }
+  const pub = secp256k1.getPublicKey(privateKey).slice(1);
+  const hash = keccak_256(pub).slice(-20);
+  return toChecksumAddress(bytesToHex(hash));
+}
 
-let count = argv.count;
-if (count <= 0) count = 1;
-for (let i = 0; i < count; ++i) {
-  printAddress(
-    argv.mnemonic,
-    argv.privateKey,
-    argv.index,
-    argv.hideMnemonic,
-    argv.hidePrivateKey,
-    argv.hideAddress
-  );
+/**
+ *
+ * @param {string} address any valid address
+ * @returns {string} a checksum address
+ */
+export function toChecksumAddress(address) {
+  if (!/^(0x)?[0-9A-Fa-f]{40}$/.test(address)) {
+    throw new Error('malformed address');
+  }
+  address = address.toLowerCase();
+  if (address.startsWith('0x')) {
+    address = address.slice(2);
+  }
+  const hashHex = bytesToHex(keccak_256(address));
+  let checksumAddress = '0x';
+  for (let i = 0; i < address.length; ++i) {
+    checksumAddress +=
+      parseInt(hashHex[i], 16) >= 8 ? address[i].toUpperCase() : address[i];
+  }
+  return checksumAddress;
+}
+
+/**
+ * Creates an account from the given arguments. If no arguments are provided,
+ * randomly generates a mnemonic phrase and creates an account from it.
+ * @param {string} mnemonic mnemonic phrase (default empty)
+ * @param {string} privateKey private key (default empty)
+ * @param {number} accountIndex account index (default 0)
+ * @returns {{ mnemonic: string, privateKey: string, address: string}} account details
+ */
+export function generateAccount(
+  mnemonic = '',
+  privateKey = '',
+  accountIndex = 0
+) {
+  if (accountIndex < 0) {
+    throw new Error('invalid account index');
+  }
+
+  if (privateKey != '') {
+    if (!/^(0x)?[0-9A-Fa-f]{64}$/.test(privateKey)) {
+      throw new Error('malformed private key');
+    }
+
+    const hasPrefix = privateKey.startsWith('0x');
+    const privateKeyBytes = hexToBytes(
+      hasPrefix ? privateKey.slice(2) : privateKey
+    );
+    return {
+      mnemonic: '',
+      privateKey: hasPrefix ? privateKey : '0x' + privateKey,
+      address: generateAddress(privateKeyBytes),
+    };
+  } else {
+    if (mnemonic == '') {
+      mnemonic = generateMnemonic();
+    }
+
+    const hdkey = HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(mnemonic));
+    const account = hdkey.derive(thePath + accountIndex);
+    return {
+      mnemonic,
+      privateKey: '0x' + bytesToHex(account.privateKey),
+      address: generateAddress(account.privateKey),
+    };
+  }
 }

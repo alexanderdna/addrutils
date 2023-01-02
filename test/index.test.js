@@ -5,9 +5,20 @@ import {
   generateAddress,
   generateMnemonic,
   toChecksumAddress,
-} from '../src/account.js';
+} from '../src/index.js';
 
 describe('account', () => {
+  it('generates random account', () => {
+    const account = generateAccount();
+    const mnemonicWords = account.mnemonic.split(' ');
+    expect(mnemonicWords.length).toEqual(12);
+    expect(wordlist).toEqual(expect.arrayContaining(mnemonicWords));
+    expect(account.privateKey).toMatch(/^0x[0-9A-Fa-f]{64}$/);
+    expect(account.address).toMatch(/^0x[0-9A-Fa-f]{40}$/);
+    expect(generateAddress(hexToBytes(account.privateKey.slice(2)))).toEqual(
+      account.address
+    );
+  });
   it('generates correct account from mnemonic', () => {
     const mnemonic =
       'weasel kingdom transfer master firm culture festival write arrest squirrel kitten attack';
@@ -38,6 +49,19 @@ describe('account', () => {
   it('generates correct account from private key', () => {
     const privateKey =
       '0x959b614d16c77c3b19a6e8ee047854fd3de7e03944e8c92339ab3b171fa866a2';
+    const account = generateAccount('', privateKey);
+    expect(account.mnemonic).toEqual('');
+    expect(account.privateKey).toEqual(
+      '0x959b614d16c77c3b19a6e8ee047854fd3de7e03944e8c92339ab3b171fa866a2'
+    );
+    expect(account.address).toEqual(
+      '0xBF7CE55AA048E8e50d86775Abf2A392e9b6f03eE'
+    );
+  });
+
+  it('generates correct account from private key w/o prefix', () => {
+    const privateKey =
+      '959b614d16c77c3b19a6e8ee047854fd3de7e03944e8c92339ab3b171fa866a2';
     const account = generateAccount('', privateKey);
     expect(account.mnemonic).toEqual('');
     expect(account.privateKey).toEqual(

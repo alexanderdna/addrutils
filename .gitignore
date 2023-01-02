@@ -1,6 +1,7 @@
 .vscode/
 .tmp/
 cjs/
+coverage/
 node_modules/
 
 addresses.txt

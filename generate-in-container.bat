@@ -1,6 +1,6 @@
 @ECHO OFF
 
-SET BINARY_NAME=addrutils
+SET BINARY_NAME=addrutils-cli
 SET CONTAINER_NAME=tmp-addrutils
 SET ACCOUNT_COUNT=10
 SET OUTPUT_FILE=addresses.txt
@@ -15,7 +15,7 @@ CALL npm run convert
 CALL npx pkg ^
     -t node16-alpine ^
     -o .tmp/%BINARY_NAME% ^
-    cjs/index.js >NUL
+    cjs/cli.js >NUL
 
 ECHO Running a temporary container without network...
 ECHO Container name is %CONTAINER_NAME%
