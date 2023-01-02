@@ -7,7 +7,7 @@ Utilities for Ethereum address generation.
 ### The fastest way
 
 ```bash
-node index.js
+node src/index.js
 ```
 
 ### Full usage information
