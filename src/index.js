@@ -1,4 +1,4 @@
-import { generateAccount } from './lib.js';
+import { generateAccount } from './account.js';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
