@@ -7,12 +7,17 @@ import * as secp256k1 from '@noble/secp256k1';
 
 const thePath = "m/44'/60'/0'/0/";
 
+/**
+ * Returns a cryptographically-safe random mnemonic phrase
+ * consisting of 12 English words.
+ * @returns {string} a mnemonic phrase
+ */
 export function generateMnemonic() {
   return bip39.generateMnemonic(wordlist);
 }
 
 /**
- *
+ * Returns a checksumed address from the given private key.
  * @param {Uint8Array} privateKey private key byte array
  * @returns {string} a checksumed address
  */
@@ -22,15 +27,15 @@ export function generateAddress(privateKey) {
   }
   const pub = secp256k1.getPublicKey(privateKey).slice(1);
   const hash = keccak_256(pub).slice(-20);
-  return toChecksumAddress(bytesToHex(hash));
+  return toChecksumedAddress(bytesToHex(hash));
 }
 
 /**
- *
+ * Returns a checksumed address.
  * @param {string} address any valid address
- * @returns {string} a checksum address
+ * @returns {string} a checksumed address
  */
-export function toChecksumAddress(address) {
+export function toChecksumedAddress(address) {
   if (!/^(0x)?[0-9A-Fa-f]{40}$/.test(address)) {
     throw new Error('malformed address');
   }

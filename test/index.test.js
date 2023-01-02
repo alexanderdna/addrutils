@@ -4,7 +4,7 @@ import {
   generateAccount,
   generateAddress,
   generateMnemonic,
-  toChecksumAddress,
+  toChecksumedAddress,
 } from '../src/index.js';
 
 describe('account', () => {
@@ -89,7 +89,7 @@ describe('account', () => {
 
   it('generates correct checksum address', () => {
     const address = '0x8d76de9387e882f526d57fc359fff3b83bd2f1e8';
-    const checksumAddress = toChecksumAddress(address);
+    const checksumAddress = toChecksumedAddress(address);
     expect(checksumAddress).toEqual(
       '0x8d76De9387E882f526d57fC359FFf3B83bd2f1E8'
     );
@@ -115,7 +115,7 @@ describe('account', () => {
 
   it('throws when receives malformed address', () => {
     expect(() => {
-      toChecksumAddress('aal;skdjfal;');
+      toChecksumedAddress('aal;skdjfal;');
     }).toThrow('malformed address');
   });
 

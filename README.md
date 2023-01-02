@@ -2,7 +2,7 @@
 
 Utilities for Ethereum address generation.
 
-## Usage
+## CLI
 
 ### The fastest way
 
@@ -57,6 +57,10 @@ and remove the container as well as other temporary files.
 
 The Batch script is `generate-in-container.bat`. You are advised
 to have a look at it to make sure it works the way you prefer.
+
+## API
+
+See [API.md](./API.md)
 
 ## Contribute
 
