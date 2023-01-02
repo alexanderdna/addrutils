@@ -1,33 +1,6 @@
-const { HDKey } = require('@scure/bip32');
-const bip39 = require('@scure/bip39');
-const { wordlist } = require('@scure/bip39/wordlists/english');
-const { keccak_256 } = require('@noble/hashes/sha3');
-const { bytesToHex: toHex, hexToBytes } = require('@noble/hashes/utils');
-const secp256k1 = require('@noble/secp256k1');
-const yargs = require('yargs');
-const { hideBin } = require('yargs/helpers');
-
-const thePath = "m/44'/60'/0'/0/";
-
-function generateMnemonic() {
-  return bip39.generateMnemonic(wordlist);
-}
-
-function generateAddress(/** @type {Uint8Array} */ privateKey) {
-  const pub = secp256k1.getPublicKey(privateKey).slice(1);
-  const hash = keccak_256(pub).slice(-20);
-  return toChecksumAddress(toHex(hash));
-}
-
-function toChecksumAddress(/** @type string */ address) {
-  const hashHex = toHex(keccak_256(address));
-  let checksumAddress = '0x';
-  for (let i = 0; i < address.length; ++i) {
-    checksumAddress +=
-      parseInt(hashHex[i], 16) >= 8 ? address[i].toUpperCase() : address[i];
-  }
-  return checksumAddress;
-}
+import { generateAccount } from './lib.js';
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
 
 function printAddress(
   mnemonic,
@@ -37,37 +10,16 @@ function printAddress(
   hidingPrivateKey,
   hidingAddress
 ) {
-  let address;
-
-  if (mnemonic == '' && privateKey == '') {
-    mnemonic = generateMnemonic();
-  }
-
-  if (mnemonic != '') {
-    const hdkey = HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(mnemonic));
-    const account = hdkey.derive(thePath + accountIndex);
-    privateKey = '0x' + toHex(account.privateKey);
-    address = generateAddress(account.privateKey);
-  } else if (privateKey != '') {
-    mnemonic = '<not available>';
-    if (!/^0x[0-9A-Fa-f]{64}$/.test(privateKey)) {
-      console.error('Invalid private key');
-      process.exit(1);
-      return;
-    }
-
-    const privateKeyBytes = hexToBytes(privateKey.slice(2));
-    address = generateAddress(privateKeyBytes);
-  }
+  const result = generateAccount(mnemonic, privateKey, accountIndex);
 
   if (!hidingMnemonic) {
-    console.log(mnemonic);
+    console.log(result.mnemonic);
   }
   if (!hidingPrivateKey) {
-    console.log(privateKey);
+    console.log(result.privateKey);
   }
   if (!hidingAddress) {
-    console.log(address);
+    console.log(result.address);
   }
 }
 

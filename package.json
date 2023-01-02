@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "start": "node index.js"
+    "start": "node ./src/index.js",
+    "convert": "babel src -d cjs",
+    "build:win:x64": "npm run convert && pkg cjs/index.js -t node16-win-x64 -o .tmp/addrutils.exe"
   },
   "keywords": [],
   "author": "Anh Dang",
@@ -17,6 +20,9 @@
     "yargs": "^17.6.2"
   },
   "devDependencies": {
+    "@babel/cli": "^7.20.7",
+    "@babel/core": "^7.20.7",
+    "@babel/preset-env": "^7.20.2",
     "pkg": "^5.8.0"
   }
 }

@@ -11,10 +11,11 @@ ECHO Output file is %OUTPUT_FILE%
 MKDIR .tmp
 
 ECHO Packaging script...
+CALL npm run convert
 CALL npx pkg ^
     -t node16-alpine ^
     -o .tmp/%BINARY_NAME% ^
-    index.js >NUL
+    cjs/index.js >NUL
 
 ECHO Running a temporary container without network...
 ECHO Container name is %CONTAINER_NAME%
