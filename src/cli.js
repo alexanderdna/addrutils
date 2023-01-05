@@ -89,7 +89,7 @@ const argv = yargs(hideBin(process.argv))
   .epilog(
     'User can provide an existing mnemonic phrase using the -m option. ' +
       'In such case, the private key and address will be generated from this mnemonic phrase. ' +
-      'User can provide the -i option to chane the account index. ' +
+      'User can provide the -i option to change the account index. ' +
       'The -c option will not be available since there is only one mnemonic phrase.\n'
   )
   .epilog(

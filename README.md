@@ -36,7 +36,7 @@ change the account index in the derivation path (default is 0), as well as the
 
 User can provide an existing mnemonic phrase using the -m option. In such case,
 the private key and address will be generated from this mnemonic phrase. User
-can provide the -i option to chane the account index. The -c option will not be
+can provide the -i option to change the account index. The -c option will not be
 available since there is only one mnemonic phrase.
 
 Instead, user can provide a private key using the -p option. In such case,
