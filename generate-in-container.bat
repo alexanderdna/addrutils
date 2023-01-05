@@ -1,6 +1,6 @@
 @ECHO OFF
 
-SET BINARY_NAME=addrutils-cli
+SET BINARY_NAME=addrutils
 SET CONTAINER_NAME=tmp-addrutils
 SET ACCOUNT_COUNT=10
 SET OUTPUT_FILE=addresses.txt
